@@ -95,3 +95,61 @@ GrB_Info GB_Type_new
     return (GrB_SUCCESS) ;
 }
 
+// Create variable-size type
+
+GrB_Info GB_VSType_new
+(
+    GrB_Type *type,             // handle of user type to create
+    size_t sizeof_ctype,        // size of the user type
+    GxB_VST_init_function finit,// pointer to the init function
+    GxB_VST_destroy_function fdestroy,// pointer to the destroy function
+    GxB_VST_copy_function fcopy,// pointer to the copy function
+    GxB_VST_asprintf_function fasprintf,// pointer to the asprintf funtion
+    GxB_VST_dasprintf_function fdasprintf,// pointer to the destroy funtion for
+                                // asprintf string
+    const char *name            // name of the type
+)
+{
+
+    //--------------------------------------------------------------------------
+    // check inputs
+    //--------------------------------------------------------------------------
+
+    GB_WHERE ("GrB_Type_new (&type, sizeof (ctype))") ;
+    GB_RETURN_IF_NULL (type) ;
+    (*type) = NULL ;
+    GB_RETURN_IF_NULL (finit) ;
+    GB_RETURN_IF_NULL (fdestroy) ;
+    GB_RETURN_IF_NULL (fcopy) ;
+    GB_RETURN_IF_NULL (fasprintf) ;
+    // fdasprintf is set to C free is input is NULL
+
+    //--------------------------------------------------------------------------
+    // create the type
+    //--------------------------------------------------------------------------
+
+    // allocate the type
+    GB_CALLOC_MEMORY (*type, 1, sizeof (struct GB_Type_opaque)) ;
+    if (*type == NULL)
+    { 
+        // out of memory
+        return (GB_OUT_OF_MEMORY) ;
+    }
+
+    // initialize the type
+    GrB_Type t = *type ;
+    t->magic = GB_MAGIC ;
+    t->size = sizeof_ctype ;
+    t->code = GB_VST_code ;     // variable-size type
+    t->finit = finit;
+    t->fdestroy = fdestroy;
+    t->fcopy = fcopy;
+    t->fasprintf = fasprintf;
+    if (fdasprintf == NULL){t->fdasprintf = free;    }
+    else                   {t->fdasprintf = fdasprintf;}
+    if (name == NULL)      {strncpy (t->name, "variable-size type", GB_LEN-1) ;}
+    else                   {strncpy (t->name, name,                 GB_LEN-1) ;}
+
+    return (GrB_SUCCESS) ;
+}
+

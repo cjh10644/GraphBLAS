@@ -468,11 +468,30 @@ GB_PUBLIC GrB_Type
 
 #undef GrB_Type_new
 
+typedef void (*GxB_VST_init_function) (void *);
+typedef void (*GxB_VST_destroy_function) (void *);
+typedef void (*GxB_VST_copy_function) (void *, const void *);
+typedef int64_t (*GxB_VST_asprintf_function) (char **, const char *, ...);
+typedef void (*GxB_VST_dasprintf_function) (void *);
+
 GB_PUBLIC
 GrB_Info GrB_Type_new           // create a new GraphBLAS type
 (
     GrB_Type *type,             // handle of user type to create
     size_t sizeof_ctype         // size = sizeof (ctype) of the C type
+) ;
+
+GB_PUBLIC
+GrB_Info GrB_VSType_new           // create a new GraphBLAS type
+(
+    GrB_Type *type,             // handle of user type to create
+    size_t sizeof_ctype,        // size = sizeof (ctype) of the C type
+    GxB_VST_init_function finit,// pointer to the init function
+    GxB_VST_destroy_function fdestroy,// pointer to the destroy function
+    GxB_VST_copy_function fcopy,// pointer to the copy function
+    GxB_VST_asprintf_function fasprintf,// pointer to the asprintf funtion
+    GxB_VST_dasprintf_function fdasprintf// pointer to the destroy funtion for
+                                // asprintf string
 ) ;
 
 // user code should not directly use GB_STR or GB_XSTR
@@ -494,6 +513,20 @@ GrB_Info GB_Type_new            // not user-callable; use GrB_Type_new instead
     size_t sizeof_ctype,        // size of the user type
     const char *name            // name of the type, as "sizeof (ctype)"
 ) ;
+
+GB_PUBLIC
+GrB_Info GB_VSType_new
+(
+    GrB_Type *type,             // handle of user type to create
+    size_t sizeof_ctype,        // size = sizeof (ctype) of the C type
+    GxB_VST_init_function finit,// pointer to the init function
+    GxB_VST_destroy_function fdestroy,// pointer to the destroy function
+    GxB_VST_copy_function fcopy,// pointer to the copy function
+    GxB_VST_asprintf_function fasprintf,// pointer to the asprintf funtion
+    GxB_VST_dasprintf_function fdasprintf,// pointer to the destroy funtion for
+                                // asprintf string
+    const char *name            // name of the type
+);
 
 // SPEC: GxB_Type_size is an extension to the spec
 
@@ -2774,6 +2807,17 @@ GrB_Info GrB_Matrix_build_FP64      // build a matrix from (I,J,X) tuples
 
 GB_PUBLIC
 GrB_Info GrB_Matrix_build_UDT       // build a matrix from (I,J,X) tuples
+(
+    GrB_Matrix C,                   // matrix to build
+    const GrB_Index *I,             // array of row indices of tuples
+    const GrB_Index *J,             // array of column indices of tuples
+    const void *X,                  // array of values of tuples
+    GrB_Index nvals,                // number of tuples
+    const GrB_BinaryOp dup          // binary function to assemble duplicates
+) ;
+
+GB_PUBLIC
+GrB_Info GrB_Matrix_build_VST       // build a matrix from (I,J,X) tuples
 (
     GrB_Matrix C,                   // matrix to build
     const GrB_Index *I,             // array of row indices of tuples

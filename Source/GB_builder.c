@@ -147,7 +147,7 @@ GrB_Info GB_builder                 // build a matrix from tuples
 
     ASSERT (Thandle != NULL) ;
     ASSERT (nvals >= 0) ;
-    ASSERT (scode <= GB_UDT_code) ;
+    ASSERT (scode <= GB_VST_code) ;
     ASSERT_TYPE_OK (ttype, "ttype for builder", GB0) ;
     ASSERT_BINARYOP_OK_OR_NULL (dup, "dup for builder", GB0) ;
     ASSERT (I_work_handle != NULL) ;
@@ -1139,7 +1139,35 @@ GrB_Info GB_builder                 // build a matrix from tuples
 
             ASSERT (S_work == NULL) ;
             ASSERT (S == S_input) ;
-            GB_memcpy (Tx, S, nvals * tsize, nthreads) ;
+            if (tcode <= GB_UDT_code)
+            {
+                GB_memcpy (Tx, S, nvals * tsize, nthreads) ;
+            }
+            else                  // perform deep copy for VST
+            {
+                int tid ;
+                #pragma omp parallel for num_threads(nthreads) schedule(static)
+                for (tid = 0 ; tid < nthreads ; tid++)
+                {
+                    int64_t tstart = tstart_slice [tid] ;
+                    int64_t tend   = tstart_slice [tid+1] ;
+                    char *buf;
+                    for (int64_t t = tstart ; t < tend ; t++)
+                    {
+                        // Tx [t] = S [t] ;
+                        printf ("Line: %d %p\n", __LINE__,S+t*tsize) ;
+                        ttype->finit(Tx +(t*tsize));
+                        printf ("Line: %d\n", __LINE__) ;
+                        ttype->fasprintf(&buf, "%Zd", S+t*tsize);
+                        printf ("Line: %d %p mpz: %s\n", __LINE__,S+t*tsize,buf) ;
+                        ttype->fdasprintf(buf);
+                        ttype->fcopy(Tx +(t*tsize), S +(t*tsize));
+                        ttype->fasprintf(&buf, "%Zd", Tx+(t*tsize));
+                        printf ("Line: %d %p mpz: %s\n", __LINE__,Tx+t*tsize,buf) ;
+                        ttype->fdasprintf(buf);
+                    }
+                }
+            }
 
         }
         else if (nocasting)
@@ -1211,9 +1239,20 @@ GrB_Info GB_builder                 // build a matrix from tuples
                 // conditions.  User-defined types cannot be typecasted, so
                 // this handles all user-defined types.
 
-                // Tx [p] = (ttype) S [k], but with no typecasting
-                #define GB_CAST_ARRAY_TO_ARRAY(Tx,p,S,k)                \
-                    memcpy (Tx +((p)*tsize), S +((k)*tsize), tsize) ;
+                if (tcode <= GB_UDT_code)
+                {
+                    // Tx [p] = (ttype) S [k], but with no typecasting
+                    #define GB_CAST_ARRAY_TO_ARRAY(Tx,p,S,k)                \
+                        memcpy (Tx +((p)*tsize), S +((k)*tsize), tsize) ;
+                }
+                else
+                {
+                    // deep copy for VST
+                    #undef  GB_CAST_ARRAY_TO_ARRAY
+                    #define GB_CAST_ARRAY_TO_ARRAY(Tx,p,S,k)                \
+                        ttype->finit(Tx +(t*tsize));                        \
+                        ttype->fcopy(Tx +(t*tsize), S +(t*tsize));
+                }
 
                 if (op_2nd)
                 { 

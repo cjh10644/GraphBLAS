@@ -29,6 +29,23 @@ GrB_Info GrB_Type_new           // create a new GraphBLAS type
     size_t sizeof_ctype         // size = sizeof (ctype) of the C type
 )
 { 
+
     return (GB_Type_new (type, sizeof_ctype, NULL)) ;
+
 }
 
+GrB_Info GrB_VSType_new           // create a new GraphBLAS type
+(
+    GrB_Type *type,             // handle of user type to create
+    size_t sizeof_ctype,        // size = sizeof (ctype) of the C type
+    GxB_VST_init_function finit,// pointer to the init function
+    GxB_VST_destroy_function fdestroy,// pointer to the destroy function
+    GxB_VST_copy_function fcopy,// pointer to the copy function
+    GxB_VST_asprintf_function fasprintf,// pointer to the asprintf funtion
+    GxB_VST_dasprintf_function fdasprintf// pointer to the destroy funtion for
+                                // asprintf string
+)
+{ 
+    return (GB_VSType_new (type, sizeof_ctype, finit, fdestroy, fcopy,
+            fasprintf, fdasprintf, NULL)) ;
+}

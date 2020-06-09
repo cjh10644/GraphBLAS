@@ -17,9 +17,9 @@ GrB_Info GrB_Type_free          // free a user-defined type
 
     if (type != NULL)
     {
-        // only free a user-defined type, not a built-in one
+        // only free a user-defined/variable-size type, not a built-in one
         GrB_Type t = *type ;
-        if (t != NULL && t->code == GB_UDT_code)
+        if (t != NULL && t->code >= GB_UDT_code)
         {
             if (t->magic == GB_MAGIC)
             { 

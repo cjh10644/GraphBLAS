@@ -41,7 +41,7 @@
 
 // to reduce code size and for faster time to compile, uncomment this line;
 // GraphBLAS will be slower.  Alternatively, use cmake with -DGBCOMPACT=1
-// #define GBCOMPACT 1
+#define GBCOMPACT 1
 
 // for code development only
 // #define GB_DEVELOPER 1
@@ -410,7 +410,8 @@ typedef enum
     GB_UINT64_code  = 8,
     GB_FP32_code    = 9,
     GB_FP64_code    = 10,
-    GB_UDT_code     = 11        // void *, user-defined type
+    GB_UDT_code     = 11,        // void *, user-defined type
+    GB_VST_code     = 12         // variable size type
 }
 GB_Type_code ;                  // enumerated type code
 
@@ -537,6 +538,14 @@ struct GB_Type_opaque       // content of GrB_Type
     size_t size ;           // size of the type
     GB_Type_code code ;     // the type code
     char name [GB_LEN] ;    // name of the type
+    //JC: add function pointers to create/init, destroy, copy and print VST
+    GxB_VST_init_function finit;
+    GxB_VST_destroy_function fdestroy;
+    GxB_VST_copy_function fcopy;
+    GxB_VST_asprintf_function fasprintf;
+    GxB_VST_dasprintf_function fdasprintf;// pointer to the destroy funtion for
+                                // asprintf string
+
 } ;
 
 struct GB_UnaryOp_opaque    // content of GrB_UnaryOp

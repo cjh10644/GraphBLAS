@@ -41,4 +41,5 @@ GB_MATRIX_BUILD (uint64_t , UINT64 )
 GB_MATRIX_BUILD (float    , FP32   )
 GB_MATRIX_BUILD (double   , FP64   )
 GB_MATRIX_BUILD (void     , UDT    )
+GB_MATRIX_BUILD (void     , VST    )
 
