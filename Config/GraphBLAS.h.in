@@ -468,11 +468,38 @@ GB_PUBLIC GrB_Type
 
 #undef GrB_Type_new
 
-typedef void (*GxB_VST_init_function) (void *);
-typedef void (*GxB_VST_destroy_function) (void *);
-typedef void (*GxB_VST_copy_function) (void *, const void *);
-typedef int64_t (*GxB_VST_asprintf_function) (char **, const char *, ...);
-typedef void (*GxB_VST_dasprintf_function) (void *);
+
+typedef GrB_Info (*GxB_VST_init_function)
+    (size_t count, int max_nthreads,
+        void *      // ptr to first scalar to init
+        );
+typedef GrB_Info (*GxB_VST_destroy_function)
+    (size_t count, int max_nthreads,
+        void *);    // ptr to the scalar to destroy
+typedef GrB_Info (*GxB_VST_copy_function)
+    (size_t count, int max_nthreads,
+        void *,             // output
+        const void *) ;     // input
+
+// assert: internal function may use its own thread-local-storage, or it may
+// malloc the output string, as it chooses.
+typedef GrB_Info (*GxB_VST_display_function)
+    ( /* always prints one object (count == 1)*/
+        int64_t *result,    // length of resulting string
+        char **,            // output string, perhaps malloc'ed
+        const int level,    // 0:nothing (just check), 1:terse, 2:more, 3: all
+        void *              // the scalar itself
+        );
+
+typedef GrB_Info (*GxB_VST_display_free_function) (char *);
+    // could be:
+    // if NULL: do nothing, GrB doesn't call it, GrB_Info implied GrB_SUCCESS
+    // char *S ;   S [0] = '\0' ; return (GrB_SUCCESS)
+    // char *S ;   free (S) ;
+    // char *S ;   do nothing
+    // C++ destructor of the string
+    // etc ...
+    // after GrB calls this, it will not access the char *S.
 
 GB_PUBLIC
 GrB_Info GrB_Type_new           // create a new GraphBLAS type
@@ -628,6 +655,9 @@ GB_PUBLIC GrB_UnaryOp
 // discussion of GrB_Type_new above.
 
 typedef void (*GxB_unary_function)  (void *, const void *) ;
+typedef GrB_Info (*GxB_VST_unary_function)
+    (int max_nthreads,          // max # of threads to use
+        void *, const void *) ;
 
 #undef GrB_UnaryOp_new
 
@@ -930,6 +960,12 @@ GB_PUBLIC GrB_BinaryOp
 // discussion of GrB_Type_new above.
 
 typedef void (*GxB_binary_function) (void *, const void *, const void *) ;
+
+/// could be info GrB_mxm (&C, A, B) ... !!
+typedef GrB_Info (*GxB_VST_binary_function) 
+    ( int max_nthreads,
+        void *, const void *, const void *) ;
+
 
 #undef GrB_BinaryOp_new
 
