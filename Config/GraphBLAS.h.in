@@ -468,6 +468,7 @@ GB_PUBLIC GrB_Type
 
 #undef GrB_Type_new
 
+
 typedef GrB_Info (*GxB_VST_init_function)
     (size_t count, int max_nthreads,
         void *      // ptr to first scalar to init
@@ -484,7 +485,7 @@ typedef GrB_Info (*GxB_VST_copy_function)
 // malloc the output string, as it chooses.
 typedef GrB_Info (*GxB_VST_display_function)
     ( /* always prints one object (count == 1)*/
-        //int64_t *result,    // length of resulting string
+        int64_t *result,    // length of resulting string
         char **,            // output string, perhaps malloc'ed
         const int level,    // 0:nothing (just check), 1:terse, 2:more, 3: all
         void *              // the scalar itself
@@ -515,9 +516,9 @@ GrB_Info GrB_VSType_new           // create a new GraphBLAS type
     GxB_VST_init_function finit,// pointer to the init function
     GxB_VST_destroy_function fdestroy,// pointer to the destroy function
     GxB_VST_copy_function fcopy,// pointer to the copy function
-    GxB_VST_display_function fdisplay,// pointer to the asprintf funtion
-    GxB_VST_display_free_function fdisplay_free// pointer to the free funtion
-                                // for display string
+    GxB_VST_asprintf_function fasprintf,// pointer to the asprintf funtion
+    GxB_VST_dasprintf_function fdasprintf// pointer to the destroy funtion for
+                                // asprintf string
 ) ;
 
 // user code should not directly use GB_STR or GB_XSTR
@@ -548,9 +549,9 @@ GrB_Info GB_VSType_new
     GxB_VST_init_function finit,// pointer to the init function
     GxB_VST_destroy_function fdestroy,// pointer to the destroy function
     GxB_VST_copy_function fcopy,// pointer to the copy function
-    GxB_VST_display_function fdisplay,// pointer to the display funtion
-    GxB_VST_display_free_function fdisplay_free,// pointer to the free funtion
-                                // for display string
+    GxB_VST_asprintf_function fasprintf,// pointer to the asprintf funtion
+    GxB_VST_dasprintf_function fdasprintf,// pointer to the destroy funtion for
+                                // asprintf string
     const char *name            // name of the type
 );
 
@@ -964,6 +965,7 @@ typedef void (*GxB_binary_function) (void *, const void *, const void *) ;
 typedef GrB_Info (*GxB_VST_binary_function) 
     ( int max_nthreads,
         void *, const void *, const void *) ;
+
 
 #undef GrB_BinaryOp_new
 
