@@ -1155,16 +1155,28 @@ GrB_Info GB_builder                 // build a matrix from tuples
                     for (int64_t t = tstart ; t < tend ; t++)
                     {
                         // Tx [t] = S [t] ;
-                        printf ("Line: %d %p\n", __LINE__,S+t*tsize) ;
-                        ttype->finit(Tx +(t*tsize));
-                        printf ("Line: %d\n", __LINE__) ;
-                        ttype->fasprintf(&buf, "%Zd", S+t*tsize);
-                        printf ("Line: %d %p mpz: %s\n", __LINE__,S+t*tsize,buf) ;
-                        ttype->fdasprintf(buf);
-                        ttype->fcopy(Tx +(t*tsize), S +(t*tsize));
-                        ttype->fasprintf(&buf, "%Zd", Tx+(t*tsize));
-                        printf ("Line: %d %p mpz: %s\n", __LINE__,Tx+t*tsize,buf) ;
-                        ttype->fdasprintf(buf);
+//                        printf ("Line: %d %p\n", __LINE__,S+t*tsize) ;
+                        info = ttype->finit(1, 1, Tx +(t*tsize));
+                        if (info != GrB_SUCCESS)
+                        { 
+                            // out of memory
+                            GB_FREE_WORK ;
+                            return (info) ;
+                        }
+//                        printf ("Line: %d\n", __LINE__) ;
+//                        ttype->fdisplay(&buf, 1, S+t*tsize);
+//                        printf ("Line: %d %p mpz: %s\n", __LINE__,S+t*tsize,buf) ;
+//                        ttype->fdisplay_free(buf);
+                        info = ttype->fcopy(1, 1, Tx +(t*tsize), S +(t*tsize));
+                        if (info != GrB_SUCCESS)
+                        { 
+                            // out of memory
+                            GB_FREE_WORK ;
+                            return (info) ;
+                        }
+//                        ttype->fdisplay(&buf, 1, Tx+(t*tsize));
+//                        printf ("Line: %d %p mpz: %s\n", __LINE__,Tx+t*tsize,buf) ;
+//                        ttype->fdisplay_free(buf);
                     }
                 }
             }
@@ -1250,8 +1262,8 @@ GrB_Info GB_builder                 // build a matrix from tuples
                     // deep copy for VST
                     #undef  GB_CAST_ARRAY_TO_ARRAY
                     #define GB_CAST_ARRAY_TO_ARRAY(Tx,p,S,k)                \
-                        ttype->finit(Tx +(t*tsize));                        \
-                        ttype->fcopy(Tx +(t*tsize), S +(t*tsize));
+                        ttype->finit(1, 1, Tx +(t*tsize));                  \
+                        ttype->fcopy(1, 1, Tx +(t*tsize), S +(t*tsize));
                 }
 
                 if (op_2nd)

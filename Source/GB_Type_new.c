@@ -104,9 +104,9 @@ GrB_Info GB_VSType_new
     GxB_VST_init_function finit,// pointer to the init function
     GxB_VST_destroy_function fdestroy,// pointer to the destroy function
     GxB_VST_copy_function fcopy,// pointer to the copy function
-    GxB_VST_asprintf_function fasprintf,// pointer to the asprintf funtion
-    GxB_VST_dasprintf_function fdasprintf,// pointer to the destroy funtion for
-                                // asprintf string
+    GxB_VST_display_function fdisplay,// pointer to the asprintf funtion
+    GxB_VST_display_free_function fdisplay_free,// pointer to the free funtion
+                                // for the display string
     const char *name            // name of the type
 )
 {
@@ -121,8 +121,8 @@ GrB_Info GB_VSType_new
     GB_RETURN_IF_NULL (finit) ;
     GB_RETURN_IF_NULL (fdestroy) ;
     GB_RETURN_IF_NULL (fcopy) ;
-    GB_RETURN_IF_NULL (fasprintf) ;
-    // fdasprintf is set to C free is input is NULL
+    GB_RETURN_IF_NULL (fdisplay) ;
+    // fdisplay_free does nothing if input is NULL
 
     //--------------------------------------------------------------------------
     // create the type
@@ -144,9 +144,8 @@ GrB_Info GB_VSType_new
     t->finit = finit;
     t->fdestroy = fdestroy;
     t->fcopy = fcopy;
-    t->fasprintf = fasprintf;
-    if (fdasprintf == NULL){t->fdasprintf = free;    }
-    else                   {t->fdasprintf = fdasprintf;}
+    t->fdisplay = fdisplay;
+    t->fdisplay_free = fdisplay_free;
     if (name == NULL)      {strncpy (t->name, "variable-size type", GB_LEN-1) ;}
     else                   {strncpy (t->name, name,                 GB_LEN-1) ;}
 

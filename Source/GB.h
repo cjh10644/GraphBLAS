@@ -542,9 +542,9 @@ struct GB_Type_opaque       // content of GrB_Type
     GxB_VST_init_function finit;
     GxB_VST_destroy_function fdestroy;
     GxB_VST_copy_function fcopy;
-    GxB_VST_asprintf_function fasprintf;
-    GxB_VST_dasprintf_function fdasprintf;// pointer to the destroy funtion for
-                                // asprintf string
+    GxB_VST_display_function fdisplay;
+    GxB_VST_display_free_function fdisplay_free;// pointer to the free funtion
+                                // for the display string
 
 } ;
 

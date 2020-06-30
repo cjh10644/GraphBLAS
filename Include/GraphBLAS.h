@@ -468,11 +468,11 @@ GB_PUBLIC GrB_Type
 
 #undef GrB_Type_new
 
-typedef void (*GxB_VST_init_function) (void *);
-typedef void (*GxB_VST_destroy_function) (void *);
-typedef void (*GxB_VST_copy_function) (void *, const void *);
-typedef int64_t (*GxB_VST_asprintf_function) (char **, const char *, ...);
-typedef void (*GxB_VST_dasprintf_function) (void *);
+typedef GrB_Info (*GxB_VST_init_function) (int64_t count, int nthreads, void *);
+typedef GrB_Info (*GxB_VST_destroy_function) (int64_t count, int nthreads, void *);
+typedef GrB_Info (*GxB_VST_copy_function) (int64_t count, int nthreads, void *, const void *);
+typedef GrB_Info (*GxB_VST_display_function) (char **, int print_lvl, void *);
+typedef GrB_Info (*GxB_VST_display_free_function) (void *);
 
 GB_PUBLIC
 GrB_Info GrB_Type_new           // create a new GraphBLAS type
@@ -489,9 +489,9 @@ GrB_Info GrB_VSType_new           // create a new GraphBLAS type
     GxB_VST_init_function finit,// pointer to the init function
     GxB_VST_destroy_function fdestroy,// pointer to the destroy function
     GxB_VST_copy_function fcopy,// pointer to the copy function
-    GxB_VST_asprintf_function fasprintf,// pointer to the asprintf funtion
-    GxB_VST_dasprintf_function fdasprintf// pointer to the destroy funtion for
-                                // asprintf string
+    GxB_VST_display_function fdisplay,// pointer to the asprintf funtion
+    GxB_VST_display_free_function fdisplay_free// pointer to the free funtion
+                                // for display string
 ) ;
 
 // user code should not directly use GB_STR or GB_XSTR
@@ -522,9 +522,9 @@ GrB_Info GB_VSType_new
     GxB_VST_init_function finit,// pointer to the init function
     GxB_VST_destroy_function fdestroy,// pointer to the destroy function
     GxB_VST_copy_function fcopy,// pointer to the copy function
-    GxB_VST_asprintf_function fasprintf,// pointer to the asprintf funtion
-    GxB_VST_dasprintf_function fdasprintf,// pointer to the destroy funtion for
-                                // asprintf string
+    GxB_VST_display_function fdisplay,// pointer to the display funtion
+    GxB_VST_display_free_function fdisplay_free,// pointer to the free funtion
+                                // for display string
     const char *name            // name of the type
 );
 

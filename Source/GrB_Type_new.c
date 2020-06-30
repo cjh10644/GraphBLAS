@@ -41,11 +41,11 @@ GrB_Info GrB_VSType_new           // create a new GraphBLAS type
     GxB_VST_init_function finit,// pointer to the init function
     GxB_VST_destroy_function fdestroy,// pointer to the destroy function
     GxB_VST_copy_function fcopy,// pointer to the copy function
-    GxB_VST_asprintf_function fasprintf,// pointer to the asprintf funtion
-    GxB_VST_dasprintf_function fdasprintf// pointer to the destroy funtion for
-                                // asprintf string
+    GxB_VST_display_function fdisplay,// pointer to the asprintf funtion
+    GxB_VST_display_free_function fdisplay_free// pointer to the free funtion
+                                // the display string
 )
 { 
     return (GB_VSType_new (type, sizeof_ctype, finit, fdestroy, fcopy,
-            fasprintf, fdasprintf, NULL)) ;
+            fdisplay, fdisplay_free, NULL)) ;
 }
